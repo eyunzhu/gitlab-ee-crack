@@ -41,11 +41,11 @@ class License:
         license_plaintext = json.dumps(license_json).encode()
         if len(license_plaintext) % 16 > 0:
             pad = 16 - len(license_plaintext) % 16
-            license_plaintext = license_plaintext + pad.to_bytes(1) * pad
+            license_plaintext = license_plaintext + pad.to_bytes(1, byteorder='big') * pad
         encrypt_data = AES.new(aes_key, AES.MODE_CBC, aes_iv).encrypt(license_plaintext)
         pad = rsa_key.size_in_bytes() - 19
         encrypt_key = pow(bytes_to_long(bytes.fromhex(f'0001{"ff" * pad}00{aes_key.hex()}')), rsa_key.d, rsa_key.n)
-        encrypt_key = encrypt_key.to_bytes(1 + encrypt_key.bit_length() // 8)
+        encrypt_key = encrypt_key.to_bytes(1 + encrypt_key.bit_length() // 8, byteorder='big')
         encrypt_license = {
             'data': base64.b64encode(encrypt_data).decode(),
             'key': base64.b64encode(encrypt_key).decode(),
